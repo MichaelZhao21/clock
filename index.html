@@ -14,9 +14,11 @@
                 const now = dayjs().format('h:mm');
                 const sec = dayjs().get('second');
                 const am = dayjs().format('A');
+                const dts = dayjs().format('h:mm:ss a');
                 $('#time').text(now);
                 $('#seconds').text(sec);
                 $('#am').text(am);
+                $(document).attr('title', dts);
                 if (audio && dayjs().format('m:s') == '0:0') {
                     $('#bell')[0].play();
                 }
@@ -24,12 +26,13 @@
 
             function setNotifIcon() {
                 $('#notifications').css("color", audio ? "#ccc8db" : "#777777");
+                document.cookie = `audio=${audio}; path=/`;
             }
 
             $(() => {
                 const cookie = document.cookie;
                 if (cookie.indexOf('audio=true') != -1) audio = true;
-                document.cookie = `audio=${audio}`;
+                document.cookie = `audio=${audio}; path=/`;
                 setNotifIcon();
                 $('#notifications').on('click', () => {
                     audio = !audio;
