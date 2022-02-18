@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Clock</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
+        <script>
+            let audio = false;
+
+            function setTime() {
+                const now = dayjs().format('h:mm');
+                const sec = dayjs().get('second');
+                const am = dayjs().format('A');
+                $('#time').text(now);
+                $('#seconds').text(sec);
+                $('#am').text(am);
+                if (audio && dayjs().format('m:s') == '0:0') {
+                    $('#bell')[0].play();
+                }
+            }
+
+            function setNotifIcon() {
+                $('#notifications').css("color", audio ? "#ccc8db" : "#777777");
+            }
+
+            $(() => {
+                const cookie = document.cookie;
+                if (cookie.indexOf('audio=true') != -1) audio = true;
+                document.cookie = `audio=${audio}`;
+                setNotifIcon();
+                $('#notifications').on('click', () => {
+                    audio = !audio;
+                    setNotifIcon();
+                });
+
+                const nowOffset = dayjs().get('millisecond');
+                setTime();
+                setTimeout(() => {
+                    setInterval(() => {
+                        setTime();
+                    }, 1000);
+                }, nowOffset);
+            });
+        </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Oswald&display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+        <style>
+            :root {
+                --primary: #ccc8db;
+                --background-color: #303030;
+            }
+            body {
+                margin: 0;
+                overflow: hidden;
+                background-color: var(--background-color);
+            }
+            div,
+            span {
+                font-family: 'Oswald', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
+                    'Lucida Sans', Arial, sans-serif;
+                color: var(--primary);
+                line-height: 1.1;
+            }
+            .container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+            }
+            #time {
+                font-size: 75vh;
+            }
+            #seconds {
+                position: fixed;
+                right: 3rem;
+                bottom: 2rem;
+                font-size: 13vh;
+            }
+            #am {
+                position: fixed;
+                left: 3rem;
+                bottom: 2rem;
+                font-size: 13vh;
+            }
+            #notifications {
+                position: fixed;
+                left: 3rem;
+                top: 2rem;
+                font-size: 13vh;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+            #notifications:hover {
+                transform: scale(1.25);
+            }
+        </style>
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <audio id="bell">
+            <source src="https://cdn.michaelzhao.xyz/sounds/bell.ogg" />
+        </audio>
+        <span class="material-icons" id="notifications">notifications</span>
+        <div class="container">
+            <div id="time">00:00</div>
+        </div>
+        <div id="seconds">00</div>
+        <div id="am">AM</div>
+    </body>
+</html>
