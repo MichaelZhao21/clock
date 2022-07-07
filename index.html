@@ -9,7 +9,62 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
         <script>
             let audio = false;
+            let clockTimer = null;
+            let menuOpen = false;
 
+            // Onload
+            $(() => {
+                const cookie = document.cookie;
+                if (cookie.indexOf('audio=true') != -1) audio = true;
+                document.cookie = `audio=${audio}; path=/`;
+                setNotifIcon();
+                $('#notifications').on('click', () => {
+                    audio = !audio;
+                    setNotifIcon();
+                });
+
+                loadClock();
+            });
+
+            function openMenu() {
+                menuOpen = true;
+                $('#menu').addClass('menu-open');
+            }
+
+            function closeMenu() {
+                menuOpen = false;
+                $('#menu').removeClass('menu-open');
+            }
+
+            // Hides menu on click
+            $(document).on('click', function (event) {
+                if (menuOpen && event.target.className.indexOf('menu') === -1) {
+                    closeMenu();
+                }
+            });
+
+            // Change the page through the menu
+            // pageNum: 0 = clock, 1 = countdown, 2 = interval
+            function changePage(pageNum) {
+                // Stop all previous page counters
+                if (clockTimer) {
+                    clearTimeout(clockTimer);
+                    clockTimer = null;
+                }
+            }
+
+            // Load the main clock page
+            function loadClock() {
+                const nowOffset = dayjs().get('millisecond');
+                setTime();
+                clockTimer = setTimeout(() => {
+                    setInterval(() => {
+                        setTime();
+                    }, 1000);
+                }, nowOffset);
+            }
+
+            // Set the time
             function setTime() {
                 const now = dayjs().format('h:mm');
                 const sec = dayjs().get('second');
@@ -24,29 +79,11 @@
                 }
             }
 
+            // Change bell icon shade
             function setNotifIcon() {
-                $('#notifications').css("color", audio ? "#ccc8db" : "#777777");
+                $('#notifications').css('color', audio ? '#ccc8db' : '#777777');
                 document.cookie = `audio=${audio}; path=/`;
             }
-
-            $(() => {
-                const cookie = document.cookie;
-                if (cookie.indexOf('audio=true') != -1) audio = true;
-                document.cookie = `audio=${audio}; path=/`;
-                setNotifIcon();
-                $('#notifications').on('click', () => {
-                    audio = !audio;
-                    setNotifIcon();
-                });
-
-                const nowOffset = dayjs().get('millisecond');
-                setTime();
-                setTimeout(() => {
-                    setInterval(() => {
-                        setTime();
-                    }, 1000);
-                }, nowOffset);
-            });
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -73,6 +110,10 @@
                 color: var(--primary);
                 line-height: 1.1;
             }
+            h1 {
+                text-align: center;
+                font-size: 3rem;
+            }
             .container {
                 display: flex;
                 justify-content: center;
@@ -81,8 +122,51 @@
                 height: 100vh;
                 margin: 0;
             }
+            .menu-icon {
+                position: fixed;
+                right: 3rem;
+                top: 2rem;
+                font-size: 13vh;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+            .menu-icon:hover {
+                transform: scale(1.25);
+            }
+            .menu {
+                position: fixed;
+                right: 3rem;
+                top: 2rem;
+                width: 20rem;
+                height: 30rem;
+                background-color: #303030;
+                border: 1px solid #ccc8dbaa;
+                display: none;
+            }
+            .menu-open {
+                display: block;
+            }
+            .menu-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .menu-item {
+                padding: 1rem 0;
+                border: 1px solid #ccc8db;
+                width: 16rem;
+                text-align: center;
+                font-size: 2rem;
+                cursor: pointer;
+            }
+            .menu-item:hover {
+                background-color: #ccc8db30;
+            }
+            .menu-active {
+                background-color: #ccc8db30;
+            }
             #time {
-                font-size: 75vh;
+                font-size: 36vw;
             }
             #seconds {
                 position: fixed;
@@ -96,17 +180,6 @@
                 bottom: 2rem;
                 font-size: 13vh;
             }
-            #notifications {
-                position: fixed;
-                left: 3rem;
-                top: 2rem;
-                font-size: 13vh;
-                cursor: pointer;
-                transition: 0.2s;
-            }
-            #notifications:hover {
-                transform: scale(1.25);
-            }
         </style>
     </head>
     <body>
@@ -114,11 +187,21 @@
         <audio id="bell">
             <source src="https://cdn.michaelzhao.xyz/sounds/bell.ogg" />
         </audio>
-        <span class="material-icons" id="notifications">notifications</span>
-        <div class="container">
-            <div id="time">00:00</div>
+        <span class="material-icons menu-icon" onclick="openMenu()">menu</span>
+        <div id="menu" class="menu">
+            <h1 class="menu-title">Menu</h1>
+            <div class="menu-container">
+                <div class="menu-item menu-active" onclick="changePage(0)">Main Clock</div>
+                <div class="menu-item" onclick="changePage(1)">Countdown Timer</div>
+                <div class="menu-item" onclick="changePage(2)">Interval Timer</div>
+            </div>
         </div>
-        <div id="seconds">00</div>
-        <div id="am">AM</div>
+        <div class="clock-view">
+            <div class="container">
+                <div id="time">00:00</div>
+            </div>
+            <div id="seconds">00</div>
+            <div id="am">AM</div>
+        </div>
     </body>
 </html>
