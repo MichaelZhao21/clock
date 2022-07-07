@@ -12,20 +12,6 @@
             let clockTimer = null;
             let menuOpen = false;
 
-            // Onload
-            $(() => {
-                const cookie = document.cookie;
-                if (cookie.indexOf('audio=true') != -1) audio = true;
-                document.cookie = `audio=${audio}; path=/`;
-                setNotifIcon();
-                $('#notifications').on('click', () => {
-                    audio = !audio;
-                    setNotifIcon();
-                });
-
-                loadClock();
-            });
-
             function openMenu() {
                 menuOpen = true;
                 $('#menu').addClass('menu-open');
@@ -79,11 +65,16 @@
                 }
             }
 
-            // Change bell icon shade
-            function setNotifIcon() {
-                $('#notifications').css('color', audio ? '#ccc8db' : '#777777');
-                document.cookie = `audio=${audio}; path=/`;
+            // Toggle for the alarm
+            function toggleAlarm() {
+                audio = !audio;
+                if (audio) $('.menu-alarm').addClass('menu-active');
+                else $('.menu-alarm').removeClass('menu-active');
+                $('.menu-alarm-text').text(`Hourly Alarm ${audio ? 'ON' : 'OFF'}`);
             }
+
+            // Onload
+            $(loadClock);
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -138,7 +129,7 @@
                 right: 3rem;
                 top: 2rem;
                 width: 20rem;
-                height: 30rem;
+                height: 32rem;
                 background-color: #303030;
                 border: 1px solid #ccc8dbaa;
                 display: none;
@@ -160,10 +151,28 @@
                 cursor: pointer;
             }
             .menu-item:hover {
-                background-color: #ccc8db30;
+                background-color: #ccc8db10;
             }
             .menu-active {
-                background-color: #ccc8db30;
+                background-color: #ccc8db30 !important;
+            }
+            .menu-alarm {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                border: 1px solid #ccc8db;
+                margin-top: 1rem;
+                padding: 0.5rem;
+                width: 8rem;
+                height: 8rem;
+                cursor: pointer;
+            }
+            .menu-alarm:hover {
+                background-color: #ccc8db10;
+            }
+            .menu-bell {
+                font-size: 6rem;
             }
             #time {
                 font-size: 36vw;
@@ -194,6 +203,10 @@
                 <div class="menu-item menu-active" onclick="changePage(0)">Main Clock</div>
                 <div class="menu-item" onclick="changePage(1)">Countdown Timer</div>
                 <div class="menu-item" onclick="changePage(2)">Interval Timer</div>
+                <div class="menu-alarm" onclick="toggleAlarm()">
+                    <div class="material-icons menu-bell">notifications</div>
+                    <span class="menu-alarm-text">Hourly Alarm OFF</span>
+                </div>
             </div>
         </div>
         <div class="clock-view">
