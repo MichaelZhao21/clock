@@ -16,6 +16,7 @@
             // pageNum: 0 = clock, 1 = countdown, 2 = interval
             function changePage(pageNum) {
                 // Stop all previous page counters
+                console.log(clockTimer);
                 if (clockTimer) {
                     clearTimeout(clockTimer);
                     clockTimer = null;
@@ -23,17 +24,22 @@
 
                 // Remove all props from other pages
                 $('.page-icon').removeClass('icon-active');
+                $('.view').removeClass('view-active');
 
                 // Open and initialize the relevant page
                 page = pageNum;
                 if (page === 0) {
                     $('#clock-icon').addClass('icon-active');
+                    $('#clock-view').addClass('view-active');
+                    loadClock();
                 }
                 else if (page === 1) {
                     $('#countdown-icon').addClass('icon-active');
+                    $('#countdown-view').addClass('view-active');
                 }
                 else {
                     $('#interval-icon').addClass('icon-active');
+                    $('#interval-view').addClass('view-active');
                 }
             }
 
@@ -41,8 +47,8 @@
             function loadClock() {
                 const nowOffset = dayjs().get('millisecond');
                 setTime();
-                clockTimer = setTimeout(() => {
-                    setInterval(() => {
+                setTimeout(() => {
+                    clockTimer = setInterval(() => {
                         setTime();
                     }, 1000);
                 }, nowOffset);
@@ -138,6 +144,12 @@
                 background-color: var(--primary);
                 color: var(--primary);
             }
+            .view {
+                display: none;
+            }
+            .view-active {
+                display: flex;
+            }
             #time {
                 font-size: 36vw;
             }
@@ -153,6 +165,12 @@
                 bottom: 2rem;
                 font-size: 13vh;
             }
+            #countdown-time {
+                font-size: 28vw;
+            }
+            #interval-time {
+                font-size: 32vw;
+            }
         </style>
     </head>
     <body>
@@ -167,12 +185,23 @@
             <div class="material-icons icon page-icon" id="countdown-icon" onclick="changePage(1)">hourglass_top</div>
             <div class="material-icons icon page-icon" id="interval-icon" onclick="changePage(2)">history</div>
         </div>
-        <div class="clock-view">
+        <div id="clock-view" class="view view-active">
             <div class="container">
                 <div id="time">00:00</div>
             </div>
             <div id="seconds">00</div>
             <div id="am">AM</div>
+        </div>
+        <div id="countdown-view" class="view">
+            <div class="container">
+                <div id="countdown-time">00:00:00</div>
+                <input id="countdown-time-edit" placeholder="00:00:00" />
+            </div>
+        </div>
+        <div id="interval-view" class="view">
+            <div class="container">
+                <div id="interval-time">[WIP]</div>
+            </div>
         </div>
     </body>
 </html>
