@@ -99,7 +99,8 @@
                 background-color: var(--background-color);
             }
             div,
-            span {
+            span,
+            input {
                 font-family: 'Oswald', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
                     'Lucida Sans', Arial, sans-serif;
                 color: var(--primary);
@@ -150,6 +151,9 @@
             .view-active {
                 display: flex;
             }
+            .hidden {
+                display: none;
+            }
             #time {
                 font-size: 36vw;
             }
@@ -166,7 +170,16 @@
                 font-size: 13vh;
             }
             #countdown-time {
-                font-size: 28vw;
+                font-size: 24vw;
+            }
+            #countdown-time-edit {
+                font-size: 24vw;
+                background-color: transparent;
+                color: var(--primary);
+                border: none;
+                width: 85vw;
+                text-align: center;
+                padding: 0;
             }
             #interval-time {
                 font-size: 32vw;
@@ -194,8 +207,8 @@
         </div>
         <div id="countdown-view" class="view">
             <div class="container">
-                <div id="countdown-time">00:00:00</div>
-                <input id="countdown-time-edit" placeholder="00:00:00" />
+                <div id="countdown-time" class="hidden">00:00:00</div>
+                <input id="countdown-time-edit" class="" placeholder="00:00:00" />
             </div>
         </div>
         <div id="interval-view" class="view">
