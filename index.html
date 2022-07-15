@@ -10,32 +10,30 @@
         <script>
             let audio = false;
             let clockTimer = null;
-            let menuOpen = false;
+            let page = 0;
 
-            function openMenu() {
-                menuOpen = true;
-                $('#menu').addClass('menu-open');
-            }
-
-            function closeMenu() {
-                menuOpen = false;
-                $('#menu').removeClass('menu-open');
-            }
-
-            // Hides menu on click
-            $(document).on('click', function (event) {
-                if (menuOpen && event.target.className.indexOf('menu') === -1) {
-                    closeMenu();
-                }
-            });
-
-            // Change the page through the menu
+            // Change the page through icon clicks
             // pageNum: 0 = clock, 1 = countdown, 2 = interval
             function changePage(pageNum) {
                 // Stop all previous page counters
                 if (clockTimer) {
                     clearTimeout(clockTimer);
                     clockTimer = null;
+                }
+
+                // Remove all props from other pages
+                $('.page-icon').removeClass('icon-active');
+
+                // Open and initialize the relevant page
+                page = pageNum;
+                if (page === 0) {
+                    $('#clock-icon').addClass('icon-active');
+                }
+                else if (page === 1) {
+                    $('#countdown-icon').addClass('icon-active');
+                }
+                else {
+                    $('#interval-icon').addClass('icon-active');
                 }
             }
 
@@ -60,17 +58,16 @@
                 $('#seconds').text(sec);
                 $('#am').text(am);
                 $(document).attr('title', dts);
-                if (audio && dayjs().format('m:s') == '0:0') {
+                if (audio && dayjs().format('m:s') === '0:0') {
                     $('#bell')[0].play();
                 }
             }
 
-            // Toggle for the alarm
-            function toggleAlarm() {
+            // Toggle for the bell
+            function toggleBell() {
                 audio = !audio;
-                if (audio) $('.menu-alarm').addClass('menu-active');
-                else $('.menu-alarm').removeClass('menu-active');
-                $('.menu-alarm-text').text(`Hourly Alarm ${audio ? 'ON' : 'OFF'}`);
+                if (audio) $('#bell-icon').addClass('icon-active');
+                else $('#bell-icon').removeClass('icon-active');
             }
 
             // Onload
@@ -88,6 +85,7 @@
             :root {
                 --primary: #ccc8db;
                 --background-color: #303030;
+                --off: #777777;
             }
             body {
                 margin: 0;
@@ -113,66 +111,32 @@
                 height: 100vh;
                 margin: 0;
             }
-            .menu-icon {
+            #icon-box {
                 position: fixed;
                 right: 3rem;
                 top: 2rem;
-                font-size: 13vh;
+                display: flex;
+                justify-content: center;
+            }
+            .icon {
+                font-size: 8vh;
+                margin-left: 1rem;
                 cursor: pointer;
                 transition: 0.2s;
+                color: var(--off);
             }
-            .menu-icon:hover {
+            .icon:hover {
                 transform: scale(1.25);
             }
-            .menu {
-                position: fixed;
-                right: 3rem;
-                top: 2rem;
-                width: 20rem;
-                height: 32rem;
-                background-color: #303030;
-                border: 1px solid #ccc8dbaa;
-                display: none;
+            .icon-active {
+                color: var(--primary) !important;
             }
-            .menu-open {
-                display: block;
-            }
-            .menu-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .menu-item {
-                padding: 1rem 0;
-                border: 1px solid #ccc8db;
-                width: 16rem;
-                text-align: center;
-                font-size: 2rem;
-                cursor: pointer;
-            }
-            .menu-item:hover {
-                background-color: #ccc8db10;
-            }
-            .menu-active {
-                background-color: #ccc8db30 !important;
-            }
-            .menu-alarm {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                border: 1px solid #ccc8db;
-                margin-top: 1rem;
-                padding: 0.5rem;
-                width: 8rem;
-                height: 8rem;
-                cursor: pointer;
-            }
-            .menu-alarm:hover {
-                background-color: #ccc8db10;
-            }
-            .menu-bell {
-                font-size: 6rem;
+            .divider {
+                width: 0.25rem;
+                margin-left: 1rem;
+                margin-right: 1rem;
+                background-color: var(--primary);
+                color: var(--primary);
             }
             #time {
                 font-size: 36vw;
@@ -196,18 +160,12 @@
         <audio id="bell">
             <source src="https://cdn.michaelzhao.xyz/sounds/bell.ogg" />
         </audio>
-        <span class="material-icons menu-icon" onclick="openMenu()">menu</span>
-        <div id="menu" class="menu">
-            <h1 class="menu-title">Menu</h1>
-            <div class="menu-container">
-                <div class="menu-item menu-active" onclick="changePage(0)">Main Clock</div>
-                <div class="menu-item" onclick="changePage(1)">Countdown Timer</div>
-                <div class="menu-item" onclick="changePage(2)">Interval Timer</div>
-                <div class="menu-alarm" onclick="toggleAlarm()">
-                    <div class="material-icons menu-bell">notifications</div>
-                    <span class="menu-alarm-text">Hourly Alarm OFF</span>
-                </div>
-            </div>
+        <div id="icon-box">
+            <div id="bell-icon" class="material-icons icon" onclick="toggleBell()">notifications</div>
+            <div class="divider">|</div>
+            <div class="material-icons icon page-icon icon-active" id="clock-icon" onclick="changePage(0)">schedule</div>
+            <div class="material-icons icon page-icon" id="countdown-icon" onclick="changePage(1)">hourglass_top</div>
+            <div class="material-icons icon page-icon" id="interval-icon" onclick="changePage(2)">history</div>
         </div>
         <div class="clock-view">
             <div class="container">
