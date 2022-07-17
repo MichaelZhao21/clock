@@ -133,6 +133,7 @@
             }
 
             function clearCountdown() {
+                clearInterval(countdown);
                 $('#countdown-time').addClass('hidden');
                 $('#countdown-time-edit').removeClass('hidden');
             }
@@ -322,7 +323,7 @@
             </div>
             <div id="countdown-controls">
                 <div id="play" class="material-icons clock-icon" onclick="startCountdown()">play_arrow</div>
-                <div id="restart" class="material-icons clock-icon">replay</div>
+                <div id="restart" class="material-icons clock-icon" onclick="clearCountdown()">replay</div>
             </div>
         </div>
         <div id="interval-view" class="view">
