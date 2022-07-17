@@ -11,6 +11,8 @@
             let audio = false;
             let clockTimer = null;
             let page = 0;
+            let countdown = -1;
+            let countdownTimer = 0;
 
             // Change the page through icon clicks
             // pageNum: 0 = clock, 1 = countdown, 2 = interval
@@ -32,12 +34,10 @@
                     $('#clock-icon').addClass('icon-active');
                     $('#clock-view').addClass('view-active');
                     loadClock();
-                }
-                else if (page === 1) {
+                } else if (page === 1) {
                     $('#countdown-icon').addClass('icon-active');
                     $('#countdown-view').addClass('view-active');
-                }
-                else {
+                } else {
                     $('#interval-icon').addClass('icon-active');
                     $('#interval-view').addClass('view-active');
                 }
@@ -76,6 +76,67 @@
                 else $('#bell-icon').removeClass('icon-active');
             }
 
+            // Start countdown
+            function startCountdown() {
+                // Retrieve the data from the input and check for formatting
+                const raw = $('#countdown-time-edit').val();
+                if (raw.replace(/[0-9]{2}:[0-9]{2}:[0-9]{2}/g, '') !== '') {
+                    alert('Invalid format for time! Required format is HH:MM:SS');
+                    return;
+                }
+
+                // Calculate the hour, min, and secs
+                let hour = Number(raw.substring(0, 2));
+                let min = Number(raw.substring(3, 5));
+                let sec = Number(raw.substring(6));
+                if (sec > 59) {
+                    sec %= 60;
+                    min++;
+                }
+                if (min > 59) {
+                    min %= 60;
+                    hour++;
+                }
+                if (hour > 99) {
+                    hour = 99;
+                }
+                countdownTimer = hour * 3600 + min * 60 + sec;
+
+                // Set the inital alarm display
+                countdownUpdate();
+                $('#countdown-time').removeClass('hidden');
+                $('#countdown-time-edit').addClass('hidden');
+
+                // Start the interval timer
+                countdown = setInterval(countdownUpdate, 1000);
+            }
+
+            // Create a number with a width of 2, padded to 2 digits
+            function pad(n) {
+                return ('00' + n).slice(-2);
+            }
+            
+            // Update the countdown timer each second
+            function countdownUpdate() {
+                countdownTimer--;
+                const hour = Math.floor(countdownTimer / 3600);
+                const min = Math.floor((countdownTimer % 3600) / 60);
+                const sec = Math.floor((countdownTimer % 3600) % 60);
+                $('#countdown-time').text(`${pad(hour)}:${pad(min)}:${pad(sec)}`);
+
+                if (countdownTimer === 0) {
+                    clearInterval(countdown);
+                    countdown = 0;
+                    // TODO: Find a good alarm sound
+                    $('#bell')[0].play();
+                }
+            }
+
+            function clearCountdown() {
+                $('#countdown-time').addClass('hidden');
+                $('#countdown-time-edit').removeClass('hidden');
+            }
+
             // Onload
             $(loadClock);
         </script>
@@ -93,11 +154,13 @@
                 --background-color: #303030;
                 --off: #777777;
             }
+
             body {
                 margin: 0;
                 overflow: hidden;
                 background-color: var(--background-color);
             }
+
             div,
             span,
             input {
@@ -106,10 +169,12 @@
                 color: var(--primary);
                 line-height: 1.1;
             }
+
             h1 {
                 text-align: center;
                 font-size: 3rem;
             }
+
             .container {
                 display: flex;
                 justify-content: center;
@@ -118,6 +183,7 @@
                 height: 100vh;
                 margin: 0;
             }
+
             #icon-box {
                 position: fixed;
                 right: 3rem;
@@ -125,6 +191,7 @@
                 display: flex;
                 justify-content: center;
             }
+
             .icon {
                 font-size: 8vh;
                 margin-left: 1rem;
@@ -132,12 +199,15 @@
                 transition: 0.2s;
                 color: var(--off);
             }
+
             .icon:hover {
                 transform: scale(1.25);
             }
+
             .icon-active {
                 color: var(--primary) !important;
             }
+
             .divider {
                 width: 0.25rem;
                 margin-left: 1rem;
@@ -145,33 +215,41 @@
                 background-color: var(--primary);
                 color: var(--primary);
             }
+
             .view {
                 display: none;
             }
+
             .view-active {
                 display: flex;
             }
+
             .hidden {
                 display: none;
             }
+
             #time {
                 font-size: 36vw;
             }
+
             #seconds {
                 position: fixed;
                 right: 3rem;
                 bottom: 2rem;
                 font-size: 13vh;
             }
+
             #am {
                 position: fixed;
                 left: 3rem;
                 bottom: 2rem;
                 font-size: 13vh;
             }
+
             #countdown-time {
                 font-size: 24vw;
             }
+
             #countdown-time-edit {
                 font-size: 24vw;
                 background-color: transparent;
@@ -181,22 +259,54 @@
                 text-align: center;
                 padding: 0;
             }
+
+            #countdown-controls {
+                position: fixed;
+                left: 2rem;
+                bottom: 3rem;
+            }
+
+            .clock-icon {
+                font-size: 13vh;
+                margin-right: 1rem;
+                cursor: pointer;
+                transition: 0.2s;
+                color: var(--off);
+            }
+
+            .clock-icon:hover {
+                transform: scale(1.25);
+            }
+
             #interval-time {
                 font-size: 32vw;
             }
         </style>
     </head>
+
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <audio id="bell">
             <source src="https://cdn.michaelzhao.xyz/sounds/bell.ogg" />
         </audio>
         <div id="icon-box">
-            <div id="bell-icon" class="material-icons icon" onclick="toggleBell()">notifications</div>
+            <div id="bell-icon" class="material-icons icon" onclick="toggleBell()">
+                notifications
+            </div>
             <div class="divider">|</div>
-            <div class="material-icons icon page-icon icon-active" id="clock-icon" onclick="changePage(0)">schedule</div>
-            <div class="material-icons icon page-icon" id="countdown-icon" onclick="changePage(1)">hourglass_top</div>
-            <div class="material-icons icon page-icon" id="interval-icon" onclick="changePage(2)">history</div>
+            <div
+                class="material-icons icon page-icon icon-active"
+                id="clock-icon"
+                onclick="changePage(0)"
+            >
+                schedule
+            </div>
+            <div class="material-icons icon page-icon" id="countdown-icon" onclick="changePage(1)">
+                hourglass_top
+            </div>
+            <div class="material-icons icon page-icon" id="interval-icon" onclick="changePage(2)">
+                history
+            </div>
         </div>
         <div id="clock-view" class="view view-active">
             <div class="container">
@@ -209,6 +319,10 @@
             <div class="container">
                 <div id="countdown-time" class="hidden">00:00:00</div>
                 <input id="countdown-time-edit" class="" placeholder="00:00:00" />
+            </div>
+            <div id="countdown-controls">
+                <div id="play" class="material-icons clock-icon" onclick="startCountdown()">play_arrow</div>
+                <div id="restart" class="material-icons clock-icon">replay</div>
             </div>
         </div>
         <div id="interval-view" class="view">
