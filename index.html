@@ -63,7 +63,7 @@
                 $('#time').text(now);
                 $('#seconds').text(sec);
                 $('#am').text(am);
-                $(document).attr('title', dts);
+                if (page === 0) $(document).attr('title', dts);
                 if (audio && dayjs().format('m:s') === '0:0') {
                     $('#bell')[0].play();
                 }
