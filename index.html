@@ -160,8 +160,11 @@
                         $('#alarm')[0].play();
                     $('#countdown-time').text('00:00:00');
                     alert('Time is up!');
+
+                    // Reset the alarm
                     $('#alarm')[0].pause();
                     $('#alarm')[0].currentTime = 0;
+                    clearCountdown();
                 }
             }
 
@@ -173,6 +176,13 @@
                 $('#countdown-time').addClass('hidden');
                 $('#countdown-time-edit').removeClass('hidden');
                 $(document).attr('title', '00:00:00');
+            }
+
+            // If user presses enter, start the countdown
+            function enterCheck() {
+                if (event.key === 'Enter') {
+                    startCountdown();
+                }
             }
 
             // Onload
@@ -357,7 +367,7 @@
         <div id="countdown-view" class="view">
             <div class="container">
                 <div id="countdown-time" class="hidden">00:00:00</div>
-                <input id="countdown-time-edit" class="" placeholder="00:00:00" />
+                <input id="countdown-time-edit" class="" placeholder="00:00:00" onkeydown="enterCheck()" />
             </div>
             <div id="countdown-controls">
                 <div id="play" class="material-icons clock-icon" onclick="startCountdown()">play_arrow</div>
