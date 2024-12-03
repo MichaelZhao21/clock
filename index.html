@@ -156,14 +156,16 @@
                     clearInterval(countdown);
                     countdown = 0;
                     $('#play').text('play_arrow').removeClass('icon-active');
-                    if (audio)
+                    if (audio) {
+                        $('#alarm')[0].currentTime = 0;
                         $('#alarm')[0].play();
+                    }
                     $('#countdown-time').text('00:00:00');
                     alert('Time is up!');
 
                     // Reset the alarm
                     $('#alarm')[0].pause();
-                    $('#alarm')[0].currentTime = 0;
+                    $('#alarm')[0].currentTime = 1000000;
                     clearCountdown();
                 }
             }
