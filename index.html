@@ -9,11 +9,19 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"></script>
         <script>
+            // Globals
             let audio = false;
             let clockTimer = null;
             let page = 0;
             let countdown = -1;
             let countdownTimer = 0;
+            let notifs = false;
+            let countdownTotal = '';
+
+            function onLoad() {
+                // Load the clock
+                loadClock();
+            }
 
             // Change the page through icon clicks
             // pageNum: 0 = clock, 1 = countdown
@@ -74,6 +82,15 @@
                 audio = !audio;
                 if (audio) $('#bell-icon').addClass('icon-active');
                 else $('#bell-icon').removeClass('icon-active');
+
+                if (audio && !notifs) {
+                    // Request notification permissions
+                    if ('Notification' in window) {
+                        Notification.requestPermission().then((result) => {
+                            notifs = result === 'granted';
+                        });
+                    }
+                }
             }
 
             // Start countdown
@@ -125,6 +142,7 @@
                     hour = 99;
                 }
                 countdownTimer = hour * 3600 + min * 60 + sec;
+                countdownTotal = timeToString(countdownTimer);
 
                 // Set the inital alarm display
                 countdownUpdate();
@@ -141,14 +159,18 @@
             function pad(n) {
                 return ('00' + n).slice(-2);
             }
+
+            function timeToString(time) {
+                const hour = Math.floor(time / 3600);
+                const min = Math.floor((time % 3600) / 60);
+                const sec = Math.floor((time % 3600) % 60);
+                return `${pad(hour)}:${pad(min)}:${pad(sec)}`;
+            }
             
             // Update the countdown timer each second
             function countdownUpdate() {
                 countdownTimer--;
-                const hour = Math.floor(countdownTimer / 3600);
-                const min = Math.floor((countdownTimer % 3600) / 60);
-                const sec = Math.floor((countdownTimer % 3600) % 60);
-                const text = `${pad(hour)}:${pad(min)}:${pad(sec)}`;
+                const text = timeToString(countdownTimer);
                 $('#countdown-time').text(text);
                 $(document).attr('title', text);
 
@@ -161,6 +183,10 @@
                         $('#alarm')[0].play();
                     }
                     $('#countdown-time').text('00:00:00');
+                    if (notifs) {
+                        const text = `Total time was ${countdownTotal}`;
+                        new Notification('Time is up!', {body: text, icon: 'icon.png'});
+                    } 
                     alert('Time is up!');
 
                     // Reset the alarm
@@ -188,7 +214,7 @@
             }
 
             // Onload
-            $(loadClock);
+            $(onLoad);
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
