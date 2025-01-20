@@ -31,6 +31,9 @@
                     clearTimeout(clockTimer);
                     clockTimer = null;
                 }
+                if (countdown) {
+                    clearCountdown();
+                }
 
                 // Remove all props from other pages
                 $('.page-icon').removeClass('icon-active');
@@ -144,6 +147,11 @@
                 countdownTimer = hour * 3600 + min * 60 + sec;
                 countdownTotal = timeToString(countdownTimer);
 
+                // Set the unload alert
+                $(window).on('beforeunload', function(){
+                    return 'Are you sure you want to leave? Your countdown is still running!';
+                });
+
                 // Set the inital alarm display
                 countdownUpdate();
                 $('#countdown-time').removeClass('hidden');
@@ -177,6 +185,7 @@
                 if (countdownTimer === 0) {
                     clearInterval(countdown);
                     countdown = 0;
+                    $(window).off('beforeunload');
                     $('#play').text('play_arrow').removeClass('icon-active');
                     if (audio) {
                         $('#alarm')[0].currentTime = 0;
@@ -200,6 +209,7 @@
             function clearCountdown() {
                 clearInterval(countdown);
                 countdownTimer = 0;
+                $(window).off('beforeunload');
                 $('#play').text('play_arrow').removeClass('icon-active');
                 $('#countdown-time').addClass('hidden');
                 $('#countdown-time-edit').removeClass('hidden');
