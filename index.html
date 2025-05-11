@@ -24,10 +24,12 @@
                 if (audioStorage === "true") {
                     audio = true;
                     $("#bell-icon").addClass("icon-active");
-                    requestNotifs();
-                } else {
-                    audio = false;
-                    $("#bell-icon").removeClass("icon-active");
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        notifs = true;
+                    } else {
+                        if (Notification.permission !== "denied")
+                            alert("Notifications have been disabled. Please double-click the bell icon to enable them.");
+                    }
                 }
 
                 // Load the clock
@@ -100,7 +102,14 @@
                 // Save the audio state to local storage
                 localStorage.setItem("audio", audio);
 
-                requestNotifs();
+                if (audio && !notifs) {
+                    // Request notification permissions
+                    if ("Notification" in window) {
+                        Notification.requestPermission().then((result) => {
+                            notifs = result === "granted";
+                        });
+                    }
+                }
             }
 
             // Start countdown
@@ -228,19 +237,6 @@
                 $("#countdown-time").addClass("hidden");
                 $("#countdown-time-edit").removeClass("hidden");
                 $(document).attr("title", "00:00:00");
-            }
-
-            // Request notification permissions if the bell is on
-            // and the user has not already accepted
-            function requestNotifs() {
-                if (audio && !notifs) {
-                    // Request notification permissions
-                    if ("Notification" in window) {
-                        Notification.requestPermission().then((result) => {
-                            notifs = result === "granted";
-                        });
-                    }
-                }
             }
 
             // If user presses enter, start the countdown
