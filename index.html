@@ -16,17 +16,18 @@
             let countdown = -1;
             let countdownTimer = 0;
             let notifs = false;
-            let countdownTotal = '';
+            let countdownTotal = "";
 
             function onLoad() {
                 // Read local storage and see if the bell is on
-                const audioStorage = localStorage.getItem('audio');
-                if (audioStorage === 'true') {
+                const audioStorage = localStorage.getItem("audio");
+                if (audioStorage === "true") {
                     audio = true;
-                    $('#bell-icon').addClass('icon-active');
+                    $("#bell-icon").addClass("icon-active");
+                    requestNotifs();
                 } else {
                     audio = false;
-                    $('#bell-icon').removeClass('icon-active');
+                    $("#bell-icon").removeClass("icon-active");
                 }
 
                 // Load the clock
@@ -46,28 +47,28 @@
                 }
 
                 // Remove all props from other pages
-                $('.page-icon').removeClass('icon-active');
-                $('.view').removeClass('view-active');
+                $(".page-icon").removeClass("icon-active");
+                $(".view").removeClass("view-active");
 
                 // Open and initialize the relevant page
                 page = pageNum;
                 if (page === 0) {
-                    $('#clock-icon').addClass('icon-active');
-                    $('#clock-view').addClass('view-active');
+                    $("#clock-icon").addClass("icon-active");
+                    $("#clock-view").addClass("view-active");
                     loadClock();
                 } else if (page === 1) {
-                    $('#countdown-icon').addClass('icon-active');
-                    $('#countdown-view').addClass('view-active');
-                    $(document).attr('title', '00:00:00');
+                    $("#countdown-icon").addClass("icon-active");
+                    $("#countdown-view").addClass("view-active");
+                    $(document).attr("title", "00:00:00");
                 } else {
-                    alert('Invalid page :(');
+                    alert("Invalid page :(");
                 }
             }
 
             // Load the main clock page
             function loadClock() {
                 setTime();
-                const nowOffset = dayjs().get('millisecond');
+                const nowOffset = dayjs().get("millisecond");
                 setTimeout(() => {
                     clockTimer = setInterval(() => {
                         setTime();
@@ -77,36 +78,29 @@
 
             // Set the time
             function setTime() {
-                const now = dayjs().format('h:mm');
-                const sec = dayjs().get('second');
-                const am = dayjs().format('A');
-                const dts = dayjs().format('h:mm:ss a');
-                $('#time').text(now);
-                $('#seconds').text(sec);
-                $('#am').text(am);
-                if (page === 0) $(document).attr('title', dts);
-                if (audio && dayjs().format('m:s') === '0:0') {
-                    $('#bell')[0].play();
+                const now = dayjs().format("h:mm");
+                const sec = dayjs().get("second");
+                const am = dayjs().format("A");
+                const dts = dayjs().format("h:mm:ss a");
+                $("#time").text(now);
+                $("#seconds").text(sec);
+                $("#am").text(am);
+                if (page === 0) $(document).attr("title", dts);
+                if (audio && dayjs().format("m:s") === "0:0") {
+                    $("#bell")[0].play();
                 }
             }
 
             // Toggle for the bell
             function toggleBell() {
                 audio = !audio;
-                if (audio) $('#bell-icon').addClass('icon-active');
-                else $('#bell-icon').removeClass('icon-active');
+                if (audio) $("#bell-icon").addClass("icon-active");
+                else $("#bell-icon").removeClass("icon-active");
 
                 // Save the audio state to local storage
-                localStorage.setItem('audio', audio);
+                localStorage.setItem("audio", audio);
 
-                if (audio && !notifs) {
-                    // Request notification permissions
-                    if ('Notification' in window) {
-                        Notification.requestPermission().then((result) => {
-                            notifs = result === 'granted';
-                        });
-                    }
-                }
+                requestNotifs();
             }
 
             // Start countdown
@@ -116,12 +110,12 @@
                 if (countdownTimer !== 0) {
                     // Restart timer if not running
                     if (countdown === 0) {
-                        $('#play').text('pause');
+                        $("#play").text("pause");
                         countdown = setInterval(countdownUpdate, 1000);
                         return;
                     }
                     // Otherwise, pause the timer
-                    $('#play').text('play_arrow');
+                    $("#play").text("play_arrow");
                     clearInterval(countdown);
                     countdown = 0;
                     return;
@@ -133,7 +127,9 @@
                 const parts = raw.split(":").map(Number);
 
                 // Determine the number of parts and assign accordingly
-                let hour = 0, min = 0, sec = 0;
+                let hour = 0,
+                    min = 0,
+                    sec = 0;
                 if (parts.length === 3) {
                     [hour, min, sec] = parts;
                 } else if (parts.length === 2) {
@@ -141,7 +137,9 @@
                 } else if (parts.length === 1) {
                     [sec] = parts;
                 } else {
-                    alert('Invalid format for time! Required format is H:M:S, M:S, or S.');
+                    alert(
+                        "Invalid format for time! Required format is H:M:S, M:S, or S."
+                    );
                     return;
                 }
 
@@ -161,24 +159,24 @@
                 countdownTotal = timeToString(countdownTimer);
 
                 // Set the unload alert
-                $(window).on('beforeunload', function(){
-                    return 'Are you sure you want to leave? Your countdown is still running!';
+                $(window).on("beforeunload", function () {
+                    return "Are you sure you want to leave? Your countdown is still running!";
                 });
 
                 // Set the inital alarm display
                 countdownUpdate();
-                $('#countdown-time').removeClass('hidden');
-                $('#countdown-time-edit').addClass('hidden');
+                $("#countdown-time").removeClass("hidden");
+                $("#countdown-time-edit").addClass("hidden");
 
                 // Start the interval timer
                 countdown = setInterval(countdownUpdate, 1000);
 
-                $('#play').text('pause').addClass('icon-active');
+                $("#play").text("pause").addClass("icon-active");
             }
 
             // Create a number with a width of 2, padded to 2 digits
             function pad(n) {
-                return ('00' + n).slice(-2);
+                return ("00" + n).slice(-2);
             }
 
             function timeToString(time) {
@@ -187,33 +185,36 @@
                 const sec = Math.floor((time % 3600) % 60);
                 return `${pad(hour)}:${pad(min)}:${pad(sec)}`;
             }
-            
+
             // Update the countdown timer each second
             function countdownUpdate() {
                 countdownTimer--;
                 const text = timeToString(countdownTimer);
-                $('#countdown-time').text(text);
-                $(document).attr('title', text);
+                $("#countdown-time").text(text);
+                $(document).attr("title", text);
 
                 if (countdownTimer === 0) {
                     clearInterval(countdown);
                     countdown = 0;
-                    $(window).off('beforeunload');
-                    $('#play').text('play_arrow').removeClass('icon-active');
+                    $(window).off("beforeunload");
+                    $("#play").text("play_arrow").removeClass("icon-active");
                     if (audio) {
-                        $('#alarm')[0].currentTime = 0;
-                        $('#alarm')[0].play();
+                        $("#alarm")[0].currentTime = 0;
+                        $("#alarm")[0].play();
                     }
-                    $('#countdown-time').text('00:00:00');
+                    $("#countdown-time").text("00:00:00");
                     if (notifs) {
                         const text = `Total time was ${countdownTotal}`;
-                        new Notification('Time is up!', {body: text, icon: 'icon.png'});
-                    } 
-                    alert('Time is up!');
+                        new Notification("Time is up!", {
+                            body: text,
+                            icon: "icon.png",
+                        });
+                    }
+                    alert("Time is up!");
 
                     // Reset the alarm
-                    $('#alarm')[0].pause();
-                    $('#alarm')[0].currentTime = 1000000;
+                    $("#alarm")[0].pause();
+                    $("#alarm")[0].currentTime = 1000000;
                     clearCountdown();
                 }
             }
@@ -222,16 +223,29 @@
             function clearCountdown() {
                 clearInterval(countdown);
                 countdownTimer = 0;
-                $(window).off('beforeunload');
-                $('#play').text('play_arrow').removeClass('icon-active');
-                $('#countdown-time').addClass('hidden');
-                $('#countdown-time-edit').removeClass('hidden');
-                $(document).attr('title', '00:00:00');
+                $(window).off("beforeunload");
+                $("#play").text("play_arrow").removeClass("icon-active");
+                $("#countdown-time").addClass("hidden");
+                $("#countdown-time-edit").removeClass("hidden");
+                $(document).attr("title", "00:00:00");
+            }
+
+            // Request notification permissions if the bell is on
+            // and the user has not already accepted
+            function requestNotifs() {
+                if (audio && !notifs) {
+                    // Request notification permissions
+                    if ("Notification" in window) {
+                        Notification.requestPermission().then((result) => {
+                            notifs = result === "granted";
+                        });
+                    }
+                }
             }
 
             // If user presses enter, start the countdown
             function enterCheck() {
-                if (event.key === 'Enter') {
+                if (event.key === "Enter") {
                     startCountdown();
                 }
             }
@@ -245,7 +259,10 @@
             href="https://fonts.googleapis.com/css2?family=Oswald&display=swap"
             rel="stylesheet"
         />
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet"
+        />
 
         <style>
             :root {
@@ -263,8 +280,8 @@
             div,
             span,
             input {
-                font-family: 'Oswald', 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
-                    'Lucida Sans', Arial, sans-serif;
+                font-family: "Oswald", "Trebuchet MS", "Lucida Sans Unicode",
+                    "Lucida Grande", "Lucida Sans", Arial, sans-serif;
                 color: var(--primary);
                 line-height: 1.1;
             }
@@ -393,7 +410,11 @@
             <source src="https://cdn.michaelzhao.xyz/sounds/calm-alarm.ogg" />
         </audio>
         <div id="icon-box">
-            <div id="bell-icon" class="material-icons icon" onclick="toggleBell()">
+            <div
+                id="bell-icon"
+                class="material-icons icon"
+                onclick="toggleBell()"
+            >
                 notifications
             </div>
             <div class="divider">|</div>
@@ -404,7 +425,11 @@
             >
                 schedule
             </div>
-            <div class="material-icons icon page-icon" id="countdown-icon" onclick="changePage(1)">
+            <div
+                class="material-icons icon page-icon"
+                id="countdown-icon"
+                onclick="changePage(1)"
+            >
                 hourglass_top
             </div>
         </div>
@@ -418,11 +443,28 @@
         <div id="countdown-view" class="view">
             <div class="container">
                 <div id="countdown-time" class="hidden">00:00:00</div>
-                <input id="countdown-time-edit" class="" placeholder="00:00:00" onkeydown="enterCheck()" />
+                <input
+                    id="countdown-time-edit"
+                    class=""
+                    placeholder="00:00:00"
+                    onkeydown="enterCheck()"
+                />
             </div>
             <div id="countdown-controls">
-                <div id="play" class="material-icons clock-icon" onclick="startCountdown()">play_arrow</div>
-                <div id="restart" class="material-icons clock-icon" onclick="clearCountdown()">replay</div>
+                <div
+                    id="play"
+                    class="material-icons clock-icon"
+                    onclick="startCountdown()"
+                >
+                    play_arrow
+                </div>
+                <div
+                    id="restart"
+                    class="material-icons clock-icon"
+                    onclick="clearCountdown()"
+                >
+                    replay
+                </div>
             </div>
         </div>
         <div id="interval-view" class="view">
