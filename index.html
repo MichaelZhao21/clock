@@ -19,6 +19,16 @@
             let countdownTotal = '';
 
             function onLoad() {
+                // Read local storage and see if the bell is on
+                const audioStorage = localStorage.getItem('audio');
+                if (audioStorage === 'true') {
+                    audio = true;
+                    $('#bell-icon').addClass('icon-active');
+                } else {
+                    audio = false;
+                    $('#bell-icon').removeClass('icon-active');
+                }
+
                 // Load the clock
                 loadClock();
             }
@@ -56,8 +66,8 @@
 
             // Load the main clock page
             function loadClock() {
-                const nowOffset = dayjs().get('millisecond');
                 setTime();
+                const nowOffset = dayjs().get('millisecond');
                 setTimeout(() => {
                     clockTimer = setInterval(() => {
                         setTime();
@@ -85,6 +95,9 @@
                 audio = !audio;
                 if (audio) $('#bell-icon').addClass('icon-active');
                 else $('#bell-icon').removeClass('icon-active');
+
+                // Save the audio state to local storage
+                localStorage.setItem('audio', audio);
 
                 if (audio && !notifs) {
                     // Request notification permissions
